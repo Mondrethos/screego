@@ -81,9 +81,9 @@ const hostSession = async ({
             .find((t) => t.sender && t.sender.track === stream.getVideoTracks()[0]);
 
         if (!!transceiver && 'setCodecPreferences' in transceiver) {
-            const exactMatch: RTCRtpCodec[] = [];
-            const mimeMatch: RTCRtpCodec[] = [];
-            const others: RTCRtpCodec[] = [];
+            const exactMatch: RTCRtpCodecCapability[] = [];
+            const mimeMatch: RTCRtpCodecCapability[] = [];
+            const others: RTCRtpCodecCapability[] = [];
 
             RTCRtpSender.getCapabilities('video')?.codecs.forEach((codec) => {
                 if (codec.mimeType === preferCodec.mimeType) {
@@ -143,11 +143,11 @@ const clientSession = async ({
             done();
         }
     };
+    const stream = new MediaStream();
     peer.ontrack = (event) => {
-        const stream = new MediaStream();
         stream.addTrack(event.track);
-        onTrack(stream);
     };
+    onTrack(stream);
 
     return peer;
 };
@@ -332,6 +332,7 @@ export const useRoom = (config: UIConfig): UseRoom => {
         try {
             stream.current = await navigator.mediaDevices.getDisplayMedia({
                 video: {frameRate: loadSettings().framerate},
+                audio: true,
             });
         } catch (e) {
             console.log('Could not getDisplayMedia', e);
